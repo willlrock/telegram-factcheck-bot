@@ -1,6 +1,6 @@
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from app import config
-from app.handlers import start_command, help_command, handle_text_message, error_handler
+from app.handlers import start_command, help_command, handle_text_message, handle_media_message, error_handler
 from app.services.gemini import GeminiService
 from app.services.factcheck import FactCheckService
 from app.utils.logger import get_logger
@@ -31,6 +31,10 @@ def create_bot() -> Application:
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
+    application.add_handler(MessageHandler(
+        filters.VOICE | filters.AUDIO | filters.VIDEO | filters.VIDEO_NOTE,
+        handle_media_message
+    ))
     
     # Register error logger
     application.add_error_handler(error_handler)

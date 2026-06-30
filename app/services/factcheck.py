@@ -47,3 +47,31 @@ class FactCheckService:
             system_instruction=FACT_CHECKER_SYSTEM_INSTRUCTION
         )
         return verdict
+
+    def check_media(self, file_path: str) -> str:
+        """Analyzes speech/audio content of a media file and returns a factcheck verdict.
+
+        Args:
+            file_path (str): Local path to the audio/video file.
+
+        Returns:
+            str: Markdown formatted response from TruthGuard AI agent.
+        """
+        logger.info(f"Processing media factcheck request for file: {file_path}")
+        
+        user_prompt = (
+            "Пожалуйста, прослушай/посмотри этот медиафайл. Твои задачи:\n"
+            "1. Сделай краткую расшифровку (транскрипцию) ключевого утверждения, "
+            "произнесенного в записи.\n"
+            "2. Выполни его детальный фактчекинг по правилам и вердиктам, указанным в системных инструкциях.\n"
+            "3. Оформи свой ответ в виде структуры, но в самое начало (перед вердиктом) добавь блок с цитатой:\n"
+            "**🎙️ Цитата из записи**: \"[Краткая расшифровка сути сказанного]\""
+        )
+        
+        verdict = self.gemini_service.upload_and_generate_from_media(
+            file_path=file_path,
+            prompt=user_prompt,
+            system_instruction=FACT_CHECKER_SYSTEM_INSTRUCTION
+        )
+        return verdict
+
