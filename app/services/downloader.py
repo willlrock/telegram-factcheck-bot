@@ -8,9 +8,11 @@ from app import config
 logger = get_logger(__name__)
 
 def update_yt_dlp():
+    """Forces an update of yt-dlp to the master branch to ensure latest fixes."""
     try:
-        subprocess.check_call(["pip", "install", "-U", "yt-dlp"])
-        logger.info("yt-dlp updated successfully.")
+        # Installing from master branch to get the very latest extractor patches
+        subprocess.check_call(["pip", "install", "-U", "https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz"])
+        logger.info("yt-dlp updated to master branch successfully.")
     except Exception as e:
         logger.warning(f"Could not update yt-dlp: {e}")
 
