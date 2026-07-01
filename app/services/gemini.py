@@ -67,7 +67,10 @@ class GeminiService:
         logger.info(f"Uploading file {file_path} to Gemini File API...")
         uploaded_file = None
         try:
-            uploaded_file = self.client.files.upload(file=file_path)
+            uploaded_file = self.client.files.upload(
+                file=file_path, 
+                config=types.UploadFileConfig(mime_type="audio/mp4")
+            )
             logger.info(f"Uploaded file name: {uploaded_file.name}, initial state: {uploaded_file.state.name}")
 
             # Poll until ACTIVE
