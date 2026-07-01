@@ -7,6 +7,7 @@ load_dotenv()
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+PROXY_URL = os.getenv("PROXY_URL") # Добавлено
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 def validate_config() -> None:
@@ -19,6 +20,6 @@ def validate_config() -> None:
     
     if missing:
         raise ValueError(
-            f"Missing or invalid required environment variable(s): {', '.join(missing)}. "
-            "Please copy .env.example to .env and fill in your actual credentials."
+            f"Missing or invalid required environment variables: {', '.join(missing)}. "
+            "Please check your .env file or environment configuration."
         )

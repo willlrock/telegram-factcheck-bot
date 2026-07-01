@@ -3,11 +3,11 @@ import tempfile
 import yt_dlp
 import subprocess
 from app.utils.logger import get_logger
+from app import config
 
 logger = get_logger(__name__)
 
 def update_yt_dlp():
-    """Forces an update of yt-dlp to ensure latest extractors."""
     try:
         subprocess.check_call(["pip", "install", "-U", "yt-dlp"])
         logger.info("yt-dlp updated successfully.")
@@ -15,15 +15,11 @@ def update_yt_dlp():
         logger.warning(f"Could not update yt-dlp: {e}")
 
 def download_video_audio(url: str) -> str:
-    """Downloads the audio-only stream using yt-dlp with anti-bot measures."""
     logger.info(f"Starting audio download for URL: {url}")
-    
-    # Ensure yt-dlp is fresh
     update_yt_dlp()
     
     temp_dir = tempfile.gettempdir()
     
-    # Configure yt-dlp with human-like headers
     ydl_opts = {
         'format': 'bestaudio[ext=m4a]/bestaudio',
         'outtmpl': os.path.join(temp_dir, 'tg_audio_%(id)s.%(ext)s'),
@@ -33,6 +29,11 @@ def download_video_audio(url: str) -> str:
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'referer': 'https://www.instagram.com/',
     }
+    
+    # Добавляем прокси, если он задан
+    if config.PROXY_URL:
+        logger.info(f"Using proxy: {config.PROXY_URL}")
+        ydl_opts['proxy'] = config.PROXY_URL
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -44,7 +45,6 @@ def download_video_audio(url: str) -> str:
             if os.path.exists(filename):
                 return filename
             
-            # Fallback search
             video_id = info.get('id')
             if video_id:
                 for file in os.listdir(temp_dir):
@@ -55,7 +55,4 @@ def download_video_audio(url: str) -> str:
             
     except Exception as e:
         logger.error(f"Failed to download from {url}: {e}")
-        # One-time retry after a forced update if it failed
-        logger.info("Attempting one final retry after fresh update...")
-        update_yt_dlp()
-        raise RuntimeError(f"Ошибка загрузки. Видео может быть защищено или недоступно с сервера.")
+        raise RuntimeError(f"Ошибка загрузки (Instagram/YouTube). Проверьте прокси.")
